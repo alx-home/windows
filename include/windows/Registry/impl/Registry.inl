@@ -378,7 +378,7 @@ template <class TYPE, _key KEY, String KEY_NAME> Value<TYPE, KEY, KEY_NAME>::ope
       }
       throw AccessError{
          "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-         + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
+         + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
       };
    }
 
@@ -405,7 +405,7 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
           status != ERROR_SUCCESS) {
          throw AccessError{
             "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
+            + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
          };
       }
 
@@ -416,7 +416,7 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
           status != ERROR_SUCCESS) {
          throw AccessError{
             "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
+            + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
          };
       }
 
@@ -432,7 +432,7 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
           status != ERROR_SUCCESS) {
          throw AccessError{
             "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
+            + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
          };
       }
 
@@ -443,7 +443,7 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
           status != ERROR_SUCCESS) {
          throw AccessError{
             "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
+            + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
          };
       }
 
@@ -468,7 +468,7 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
           status != ERROR_SUCCESS) {
          throw AccessError{
             "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
+            + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
          };
       }
 
@@ -482,7 +482,7 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
           status != ERROR_SUCCESS) {
          throw AccessError{
             "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
+            + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
          };
       }
 
@@ -495,7 +495,7 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
           status != ERROR_SUCCESS) {
          throw AccessError{
             "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
+            + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
          };
       }
 
@@ -506,7 +506,7 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
           status != ERROR_SUCCESS) {
          throw AccessError{
             "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
+            + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
          };
       }
 
