@@ -86,7 +86,6 @@ template <class TYPE, _key KEY, String NAME> struct Value {
 
    explicit operator bool() const;
    TYPE     operator*() const;
-   explicit operator TYPE() const;
 };
 
 template <_key KEY> class KeyPtr {

@@ -295,22 +295,36 @@ Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
             + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
          };
       }
-   } else if constexpr (std::is_constructible_v<uint32_t, TYPE2>) {
+   } else if constexpr (std::is_constructible_v<uint32_t, TYPE2>
+                        && (sizeof(TYPE) <= sizeof(uint32_t))) {
       uint32_t value2{value};
 
-      if (auto const status =
-             RegSetValueExA(hKey.Handle(), name.c_str(), 0, REG_DWORD, &value2, sizeof(value2));
+      if (auto const status = RegSetValueExA(
+             hKey.Handle(),
+             name.c_str(),
+             0,
+             REG_DWORD,
+             reinterpret_cast<BYTE const*>(&value2),
+             sizeof(value2)
+          );
           status != ERROR_SUCCESS) {
          throw AccessError{
             "Registry: Couldn't set key value \"" + store_name_s<KEY::STORE_VALUE>
             + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
          };
       }
-   } else if constexpr (std::is_constructible_v<uint64_t, TYPE2>) {
+   } else if constexpr (std::is_constructible_v<uint64_t, TYPE2>
+                        && (sizeof(TYPE) <= sizeof(uint64_t))) {
       uint64_t value2{value};
 
-      if (auto const status =
-             RegSetValueExA(hKey.Handle(), name.c_str(), 0, REG_QWORD, &value2, sizeof(value2));
+      if (auto const status = RegSetValueExA(
+             hKey.Handle(),
+             name.c_str(),
+             0,
+             REG_QWORD,
+             reinterpret_cast<BYTE const*>(&value2),
+             sizeof(value2)
+          );
           status != ERROR_SUCCESS) {
          throw AccessError{
             "Registry: Couldn't set key value \"" + store_name_s<KEY::STORE_VALUE>
@@ -321,7 +335,12 @@ Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
       std::span<std::byte> value2{value};
 
       if (auto const status = RegSetValueExA(
-             hKey.Handle(), name.c_str(), 0, REG_BINARY, value2.data(), value2.size()
+             hKey.Handle(),
+             name.c_str(),
+             0,
+             REG_BINARY,
+             reinterpret_cast<BYTE const*>(value2.data()),
+             value2.size()
           );
           status != ERROR_SUCCESS) {
          throw AccessError{
@@ -440,7 +459,8 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
       }
 
       return result;
-   } else if constexpr (std::is_constructible_v<uint32_t, TYPE>) {
+   } else if constexpr (std::is_constructible_v<uint32_t, TYPE>
+                        && (sizeof(TYPE) <= sizeof(uint32_t))) {
       uint32_t value{};
       DWORD    size = sizeof(value);
       if (auto const status =
@@ -453,7 +473,8 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
       }
 
       return value;
-   } else if constexpr (std::is_constructible_v<uint64_t, TYPE>) {
+   } else if constexpr (std::is_constructible_v<uint64_t, TYPE>
+                        && (sizeof(TYPE) <= sizeof(uint64_t))) {
       uint64_t value{};
       DWORD    size = sizeof(value);
       if (auto const status =
@@ -494,10 +515,6 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
    } else {
       static_assert(false);
    }
-}
-
-template <class TYPE, _key KEY, String NAME> Value<TYPE, KEY, NAME>::operator TYPE() const {
-   return **this;
 }
 
 }  // namespace registry
