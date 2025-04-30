@@ -30,16 +30,16 @@ SOFTWARE.
 
 std::string
 GetEnv(std::string const& value) {
-   std::size_t requiredSize;
-   getenv_s(&requiredSize, nullptr, 0, value.c_str());
+   std::size_t required_size;
+   getenv_s(&required_size, nullptr, 0, value.c_str());
 
-   if (!requiredSize) {
+   if (!required_size) {
       return "";
    }
 
    std::string result;
-   result.resize(requiredSize - 1);
-   getenv_s(&requiredSize, result.data(), result.size() + 1, value.c_str());
+   result.resize(required_size - 1);
+   getenv_s(&required_size, result.data(), result.size() + 1, value.c_str());
 
    return result;
 }
