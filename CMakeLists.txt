@@ -4,6 +4,8 @@ win32_library(TARGET_NAME alx-home_windows
     FILES 
         src/Env.cpp
         src/SystemTray.cpp
+        src/Shortcuts.cpp
+        src/Lock.cpp
 
     COMPILE_OPTIONS
         -D_AFXDLL
