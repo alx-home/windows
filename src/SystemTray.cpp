@@ -289,115 +289,121 @@ SystemTray::InstallIconPending() {  //@todo
 // /////////////////////////////////////////////////////////////////////////////
 // // For minimising/maximising from system tray
 
-// BOOL CALLBACK
-// FindTrayWnd(HWND handle, LPARAM lParam) {
-//    std::string class_name{};
-//    class_name.resize(255);
-//    GetClassName(handle, class_name.data(), class_name.size());
-//    class_name.resize(class_name.find_first_of('\0'));
+BOOL CALLBACK
+FindTrayWnd(HWND handle, LPARAM lParam) {
+   std::string class_name{};
+   class_name.resize(255);
+   GetClassName(handle, class_name.data(), class_name.size());
+   class_name.resize(class_name.find_first_of('\0'));
 
-//    // Did we find the Main System Tray? If so, then get its size and keep going
-//    if (class_name == "TrayNotifyWnd") {
-//       ::GetWindowRect(handle, reinterpret_cast<CRect*>(lParam));
-//       return true;
-//    }
+   // Did we find the Main System Tray? If so, then get its size and keep going
+   if (class_name == "TrayNotifyWnd") {
+      ::GetWindowRect(handle, reinterpret_cast<CRect*>(lParam));
 
-//    // Did we find the System Clock? If so, then adjust the size of the rectangle
-//    // we have and quit (clock will be found after the system tray)
-//    if (class_name == "TrayClockWClass") {
-//       auto* rect = reinterpret_cast<CRect*>(lParam);
-//       CRect rect_clock{};
+      EnumChildWindows(handle, FindTrayWnd, lParam);
+      return true;
+   }
 
-//       ::GetWindowRect(handle, rect_clock);
+   // Did we find the System Clock? If so, then adjust the size of the rectangle
+   // we have and quit (clock will be found after the system tray)
+   if (class_name == "TrayClockWClass") {
+      auto* rect = reinterpret_cast<CRect*>(lParam);
+      CRect rect_clock{};
 
-//       // if clock is above system tray adjust accordingly
-//       if (rect_clock.bottom < rect->bottom - 5) {  // 10 = random fudge factor.
-//          rect->top = rect_clock.bottom;
-//       } else {
-//          rect->right = rect_clock.left;
-//       }
-//       return false;
-//    }
+      ::GetWindowRect(handle, rect_clock);
 
-//    return true;
-// }
+      // if clock is above system tray adjust accordingly
+      if (rect_clock.bottom < rect->bottom - 5) {  // 10 = random fudge factor.
+         rect->top = rect_clock.bottom;
+      } else {
+         rect->right = rect_clock.left;
+      }
+      return false;
+   }
+
+   return true;
+}
 
 // // enhanced version by Matthew Ellis <m.t.ellis@bigfoot.com>
-// void
-// SystemTray::GetTrayWndRect(LPRECT rect) {
-//    static constexpr auto DEFAULT_RECT_WIDTH{150};
-//    static constexpr auto DEFAULT_RECT_HEIGHT{30};
+RECT
+SystemTray::GetTrayWndRect() {
+   static constexpr auto DEFAULT_RECT_WIDTH{150};
+   static constexpr auto DEFAULT_RECT_HEIGHT{30};
 
-//    auto tray_window = ::FindWindow(_T("Shell_TrayWnd"), nullptr);
-//    if (tray_window) {
-//       ::GetWindowRect(tray_window, rect);
-//       EnumChildWindows(tray_window, FindTrayWnd, reinterpret_cast<LPARAM>(rect));
-//       return;
-//    }
-//    // OK, we failed to get the rect from the quick hack. Either explorer isn't
-//    // running or it's a new version of the shell with the window class names
-//    // changed (how dare Microsoft change these undocumented class names!) So, we
-//    // try to find out what side of the screen the taskbar is connected to. We
-//    // know that the system tray is either on the right or the bottom of the
-//    // taskbar, so we can make a good guess at where to minimize to
-//    APPBARDATA appbar_data;
-//    appbar_data.cbSize = sizeof(appbar_data);
-//    if (SHAppBarMessage(ABM_GETTASKBARPOS, &appbar_data)) {
-//       // We know the edge the taskbar is connected to, so guess the rect of the
-//       // system tray. Use various fudge factor to make it look good
-//       switch (appbar_data.uEdge) {
-//          case ABE_LEFT:
-//          case ABE_RIGHT:
-//             // We want to minimize to the bottom of the taskbar
-//             rect->top    = appbar_data.rc.bottom - 100;
-//             rect->bottom = appbar_data.rc.bottom - 16;
-//             rect->left   = appbar_data.rc.left;
-//             rect->right  = appbar_data.rc.right;
-//             break;
+   RECT rect{};
 
-//          case ABE_TOP:
-//          case ABE_BOTTOM:
-//             // We want to minimize to the right of the taskbar
-//             rect->top    = appbar_data.rc.top;
-//             rect->bottom = appbar_data.rc.bottom;
-//             rect->left   = appbar_data.rc.right - 100;
-//             rect->right  = appbar_data.rc.right - 16;
-//             break;
+   auto tray_window = ::FindWindow(_T("Shell_TrayWnd"), nullptr);
+   if (tray_window) {
+      ::GetWindowRect(tray_window, &rect);
+      EnumChildWindows(tray_window, FindTrayWnd, reinterpret_cast<LPARAM>(&rect));
+      return rect;
+   }
+   // OK, we failed to get the rect from the quick hack. Either explorer isn't
+   // running or it's a new version of the shell with the window class names
+   // changed (how dare Microsoft change these undocumented class names!) So, we
+   // try to find out what side of the screen the taskbar is connected to. We
+   // know that the system tray is either on the right or the bottom of the
+   // taskbar, so we can make a good guess at where to minimize to
+   APPBARDATA appbar_data;
+   appbar_data.cbSize = sizeof(appbar_data);
+   if (SHAppBarMessage(ABM_GETTASKBARPOS, &appbar_data)) {
+      // We know the edge the taskbar is connected to, so guess the rect of the
+      // system tray. Use various fudge factor to make it look good
+      switch (appbar_data.uEdge) {
+         case ABE_LEFT:
+         case ABE_RIGHT:
+            // We want to minimize to the bottom of the taskbar
+            rect.top    = appbar_data.rc.bottom - 100;
+            rect.bottom = appbar_data.rc.bottom - 16;
+            rect.left   = appbar_data.rc.left;
+            rect.right  = appbar_data.rc.right;
+            break;
 
-//          default:
-//             return;
-//       }
-//       return;
-//    }
+         case ABE_TOP:
+         case ABE_BOTTOM:
+            // We want to minimize to the right of the taskbar
+            rect.top    = appbar_data.rc.top;
+            rect.bottom = appbar_data.rc.bottom;
+            rect.left   = appbar_data.rc.right - 100;
+            rect.right  = appbar_data.rc.right - 16;
+            break;
 
-//    // Blimey, we really aren't in luck. It's possible that a third party shell
-//    // is running instead of explorer. This shell might provide support for the
-//    // system tray, by providing a Shell_TrayWnd window (which receives the
-//    // messages for the icons) So, look for a Shell_TrayWnd window and work out
-//    // the rect from that. Remember that explorer's taskbar is the Shell_TrayWnd,
-//    // and stretches either the width or the height of the screen. We can't rely
-//    // on the 3rd party shell's Shell_TrayWnd doing the same, in fact, we can't
-//    // rely on it being any size. The best we can do is just blindly use the
-//    // window rect, perhaps limiting the width and height to, say 150 square.
-//    // Note that if the 3rd party shell supports the same configuraion as
-//    // explorer (the icons hosted in NotifyTrayWnd, which is a child window of
-//    // Shell_TrayWnd), we would already have caught it above
-//    if (tray_window) {
-//       ::GetWindowRect(tray_window, rect);
-//       if (rect->right - rect->left > DEFAULT_RECT_WIDTH) {
-//          rect->left = rect->right - DEFAULT_RECT_WIDTH;
-//       }
-//       if (rect->bottom - rect->top > DEFAULT_RECT_HEIGHT) {
-//          rect->top = rect->bottom - DEFAULT_RECT_HEIGHT;
-//       }
+         default:
+            return rect;
+      }
+      return rect;
+   }
 
-//       return;
-//    }
+   // Blimey, we really aren't in luck. It's possible that a third party shell
+   // is running instead of explorer. This shell might provide support for the
+   // system tray, by providing a Shell_TrayWnd window (which receives the
+   // messages for the icons) So, look for a Shell_TrayWnd window and work out
+   // the rect from that. Remember that explorer's taskbar is the Shell_TrayWnd,
+   // and stretches either the width or the height of the screen. We can't rely
+   // on the 3rd party shell's Shell_TrayWnd doing the same, in fact, we can't
+   // rely on it being any size. The best we can do is just blindly use the
+   // window rect, perhaps limiting the width and height to, say 150 square.
+   // Note that if the 3rd party shell supports the same configuraion as
+   // explorer (the icons hosted in NotifyTrayWnd, which is a child window of
+   // Shell_TrayWnd), we would already have caught it above
+   if (tray_window) {
+      ::GetWindowRect(tray_window, &rect);
+      if (rect.right - rect.left > DEFAULT_RECT_WIDTH) {
+         rect.left = rect.right - DEFAULT_RECT_WIDTH;
+      }
+      if (rect.bottom - rect.top > DEFAULT_RECT_HEIGHT) {
+         rect.top = rect.bottom - DEFAULT_RECT_HEIGHT;
+      }
 
-//    // OK. Haven't found a thing. Provide a default rect based on the current work
-//    // area
-//    SystemParametersInfo(SPI_GETWORKAREA, 0, rect, 0);
-//    rect->left = rect->right - DEFAULT_RECT_WIDTH;
-//    rect->top  = rect->bottom - DEFAULT_RECT_HEIGHT;
-// }
+      return rect;
+   }
+
+   // OK. Haven't found a thing. Provide a default rect based on the current work
+   // area
+   SystemParametersInfo(SPI_GETWORKAREA, 0, &rect, 0);
+   rect.left = rect.right - DEFAULT_RECT_WIDTH;
+   rect.top  = rect.bottom - DEFAULT_RECT_HEIGHT;
+
+   return rect;
+}
 }  // namespace win32

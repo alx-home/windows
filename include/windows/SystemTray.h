@@ -69,6 +69,8 @@ public:
    bool RemoveIcon();
    bool MoveToRight();
 
+   static RECT GetTrayWndRect();
+
 protected:
    virtual LRESULT OnMessageImpl(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
