@@ -263,7 +263,7 @@ Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
 
    std::string const name{VALUE_NAME.value_.data()};
 
-   if constexpr (std::is_constructible_v<std::string_view, TYPE2>) {
+   if constexpr (std::is_constructible_v<std::string_view, TYPE>) {
       std::string_view value2{value};
       if (auto const status = RegSetValueExA(
              hKey.Handle(),
@@ -279,7 +279,7 @@ Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
             + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
          };
       }
-   } else if constexpr (std::is_constructible_v<std::span<std::string_view>, TYPE2>) {
+   } else if constexpr (std::is_constructible_v<std::span<std::string_view>, TYPE>) {
       std::string value2;
 
       for (auto& elem : std::span<std::string_view>{value}) {
@@ -295,7 +295,7 @@ Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
             + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
          };
       }
-   } else if constexpr (std::is_constructible_v<uint32_t, TYPE2>
+   } else if constexpr (std::is_constructible_v<uint32_t, TYPE>
                         && (sizeof(TYPE) <= sizeof(uint32_t))) {
       uint32_t value2{value};
 
@@ -313,7 +313,7 @@ Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
             + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
          };
       }
-   } else if constexpr (std::is_constructible_v<uint64_t, TYPE2>
+   } else if constexpr (std::is_constructible_v<uint64_t, TYPE>
                         && (sizeof(TYPE) <= sizeof(uint64_t))) {
       uint64_t value2{value};
 
@@ -331,7 +331,7 @@ Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
             + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
          };
       }
-   } else if constexpr (std::is_constructible_v<std::span<std::byte>, TYPE2>) {
+   } else if constexpr (std::is_constructible_v<std::span<std::byte>, TYPE>) {
       std::span<std::byte> value2{value};
 
       if (auto const status = RegSetValueExA(
