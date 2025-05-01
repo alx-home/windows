@@ -6,6 +6,7 @@ win32_library(TARGET_NAME alx-home_windows
         src/SystemTray.cpp
         src/Shortcuts.cpp
         src/Lock.cpp
+        src/Process.cpp
 
     COMPILE_OPTIONS
         -D_AFXDLL

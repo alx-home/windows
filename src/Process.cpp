@@ -22,26 +22,51 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "windows/Lock.h"
+#include "windows/Process.h"
 
 #include <utils/String.h>
 #include <synchapi.h>
+#include <optional>
 
 namespace win32 {
 
-Mutex::~Mutex() {
-   // Release the mutex
-   ReleaseMutex(handle_);
+Process::~Process() {
+   // Close process and thread handles.
    CloseHandle(handle_);
+   CloseHandle(thread_);
 }
 
-Lock
-CreateLock(std::string_view name) {
-   // Create a named mutex
-   return {
-      .mutex_  = {.handle_ = CreateMutexW(nullptr, true, utils::WidenString(name).data())},
-      .result_ = GetLastError()
-   };
+Process
+NewProcess(
+   std::string_view                       name,
+   std::optional<std::string>             args,
+   std::optional<std::string_view> const& cwd
+) {
+
+   // additional information
+   STARTUPINFO si;
+   ZeroMemory(&si, sizeof(si));
+   PROCESS_INFORMATION pi;
+   ZeroMemory(&pi, sizeof(pi));
+
+   // set the size of the structures
+   si.cb = sizeof(si);
+
+   // start the program up
+   CreateProcess(
+      name.data(),
+      args ? args->data() : nullptr,
+      nullptr,
+      nullptr,
+      FALSE,
+      0,
+      nullptr,
+      cwd ? cwd->data() : nullptr,
+      &si,
+      &pi
+   );
+
+   return {.handle_ = pi.hProcess, .thread_ = pi.hThread};
 }
 
 }  // namespace win32

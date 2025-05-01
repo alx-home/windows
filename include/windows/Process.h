@@ -22,26 +22,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "windows/Lock.h"
+#pragma once
 
-#include <utils/String.h>
-#include <synchapi.h>
+#include <Windows.h>
+#include <winnt.h>
+#include <optional>
+#include <string>
+#include <string_view>
 
 namespace win32 {
 
-Mutex::~Mutex() {
-   // Release the mutex
-   ReleaseMutex(handle_);
-   CloseHandle(handle_);
-}
+struct Process {
+   ~Process();
 
-Lock
-CreateLock(std::string_view name) {
-   // Create a named mutex
-   return {
-      .mutex_  = {.handle_ = CreateMutexW(nullptr, true, utils::WidenString(name).data())},
-      .result_ = GetLastError()
-   };
-}
+   HANDLE handle_;
+   HANDLE thread_;
+};
+
+Process NewProcess(
+   std::string_view                       name,
+   std::optional<std::string>             args = std::nullopt,
+   std::optional<std::string_view> const& cwd  = std::nullopt
+);
 
 }  // namespace win32

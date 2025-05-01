@@ -31,13 +31,16 @@ SOFTWARE.
 namespace win32 {
 
 struct Mutex {
-   Mutex(HANDLE);
    ~Mutex();
 
-private:
    HANDLE handle_;
 };
 
-std::pair<Mutex, HRESULT> CreateLock(std::string_view name);
+struct Lock {
+   Mutex mutex_;
+   DWORD result_;
+};
+
+Lock CreateLock(std::string_view name);
 
 }  // namespace win32
