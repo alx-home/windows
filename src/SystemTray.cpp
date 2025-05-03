@@ -42,7 +42,8 @@ SOFTWARE.
 namespace win32 {
 
 HWND           SystemTray::s__message_window{nullptr};
-uint32_t const SystemTray::TASKBAR_CREATED_MSG = ::RegisterWindowMessage("TaskbarCreated");
+uint32_t const SystemTray::TASKBAR_CREATED_MSG  = ::RegisterWindowMessage("TaskbarCreated");
+uint32_t const SystemTray::TASKBAR_CALLBACK_MSG = ::RegisterWindowMessage("TaskbarCallback");
 
 uint32_t SystemTray::s__uid = 0;
 
@@ -58,7 +59,7 @@ SystemTray::SystemTray(std::string_view tool_tip, HICON icon, bool hidden, uint3
    notify_data_.uID              = uid;
    notify_data_.hIcon            = icon;
    notify_data_.uFlags           = NIF_MESSAGE | NIF_TIP | (icon != 0 ? NIF_ICON : 0);
-   notify_data_.uCallbackMessage = WM_APP + 10;
+   notify_data_.uCallbackMessage = TASKBAR_CALLBACK_MSG;
 
    std::ranges::copy(tool_tip, notify_data_.szTip);
 
@@ -154,7 +155,7 @@ SystemTray::SetIcon(HICON icon) {
 bool
 SystemTray::SetIcon(std::string_view name) {
    auto const hIcon = static_cast<HICON>(
-      ::LoadImage(GetModuleHandle(nullptr), name.data(), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR)
+     ::LoadImage(GetModuleHandle(nullptr), name.data(), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR)
    );
    if (!hIcon) {
       return false;
@@ -169,7 +170,7 @@ SystemTray::SetIcon(std::string_view name) {
 bool
 SystemTray::SetIcon(uint32_t nIDResource) {
    auto const hIcon = static_cast<HICON>(::LoadImage(
-      GetModuleHandle(nullptr), MAKEINTRESOURCE(nIDResource), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR
+     GetModuleHandle(nullptr), MAKEINTRESOURCE(nIDResource), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR
    ));
    if (!hIcon) {
       return false;

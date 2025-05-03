@@ -40,10 +40,10 @@ public:
    static uint32_t s__uid;
 
    SystemTray(
-      std::string_view tool_tip,
-      HICON            icon   = 0,
-      bool             hidden = true,
-      uint32_t         uid    = ++s__uid
+     std::string_view tool_tip,
+     HICON            icon   = 0,
+     bool             hidden = true,
+     uint32_t         uid    = ++s__uid
    );
 
    virtual ~SystemTray();
@@ -92,7 +92,9 @@ private:
    HWND target_window_{nullptr};
 
    static uint32_t const TASKBAR_CREATED_MSG;
-   static HWND           s__message_window;
+   static uint32_t const TASKBAR_CALLBACK_MSG;
+
+   static HWND s__message_window;
 
    // static void GetTrayWndRect(LPRECT lprect);
 
