@@ -227,6 +227,11 @@ SystemTray::OnMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
       return OnTaskbarCreated(wParam, lParam);
    } else if (msg == notify_data_.uCallbackMessage) {
       return OnTrayNotification(wParam, lParam);
+   } else if (msg == WM_APP) {
+      if (auto f = reinterpret_cast<std::function<void()>*>(lParam); f) {
+         (*f)();
+         delete f;
+      }
    }
 
    return OnMessageImpl(hwnd, msg, wParam, lParam);
@@ -406,5 +411,12 @@ SystemTray::GetTrayWndRect() {
    rect.top  = rect.bottom - DEFAULT_RECT_HEIGHT;
 
    return rect;
+}
+
+void
+SystemTray::Dispatch(std::function<void()> func) {
+   PostMessageW(
+     message_window_.get(), WM_APP, 0, (LPARAM) new std::function<void()>(std::move(func))
+   );
 }
 }  // namespace win32

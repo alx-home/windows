@@ -25,6 +25,7 @@ SOFTWARE.
 #pragma once
 
 #include "Window.h"
+#include <functional>
 #ifdef _WIN32
 
 #   include <Windows.h>
@@ -70,6 +71,8 @@ public:
    bool MoveToRight();
 
    static RECT GetTrayWndRect();
+
+   void Dispatch(std::function<void()>);
 
 protected:
    virtual LRESULT OnMessageImpl(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
