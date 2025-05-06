@@ -24,6 +24,13 @@ SOFTWARE.
 
 #pragma once
 
+#include <ObjectArray.h>
+#include <shobjidl_core.h>
+#include <iostream>
+#include <ostream>
+#include <string>
+#include <utility>
+#include <vector>
 #ifdef _WIN32
 
 #   include <optional>
@@ -47,6 +54,61 @@ static constexpr WinPtr CreateMessageWindow(
   std::optional<std::string_view> const& name   = std::nullopt,
   HINSTANCE                              parent = GetModuleHandle(nullptr)
 );
+
+class JumpList {
+public:
+   JumpList();
+   ~JumpList();
+
+   void AddCategory(std::string_view name, std::vector<std::string> const& items);
+   void AddTask(std::string_view title, std::string_view app, std::string_view args);
+   void AddTaskSeparator();
+   void CommitTasks();
+
+   static void Delete();
+
+private:
+   template <class T>
+   static constexpr void Release(T* obj) {
+      obj->Release();
+   }
+   template <class T>
+   static constexpr std::unique_ptr<T, void (*)(T*)> Init() {
+      return {nullptr, Release<T>};
+   }
+   template <class T>
+   using Ptr = std::unique_ptr<T, void (*)(T*)>;
+
+   bool IsRemoved(IShellItem* item);
+
+   template <class T, class... ARGS>
+   static constexpr Ptr<T> Create(ARGS&&... args) {
+      T*   presult;
+      auto result{Init<T>()};
+
+#   pragma clang diagnostic push
+#   pragma clang diagnostic ignored "-Wlanguage-extension-token"
+      if (auto hr = CoCreateInstance(std::forward<ARGS>(args)..., IID_PPV_ARGS(&presult));
+          SUCCEEDED(hr)) {
+#   pragma clang diagnostic pop
+         result.reset(presult);
+      } else {
+         std::cerr << "Couldn't create object (" << GetLastError() << ")" << std::endl;
+      }
+
+      return result;
+   }
+
+   bool init_failed_{false};
+
+   Ptr<ICustomDestinationList> list_{
+     Create<ICustomDestinationList>(CLSID_DestinationList, nullptr, CLSCTX_INPROC_SERVER)
+   };
+   Ptr<IObjectCollection> tasks_{
+     Create<IObjectCollection>(CLSID_EnumerableObjectCollection, nullptr, CLSCTX_INPROC)
+   };
+   Ptr<IObjectArray> removed_{Init<IObjectArray>()};
+};
 
 }  // namespace win32
 

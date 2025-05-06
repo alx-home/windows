@@ -7,6 +7,7 @@ win32_library(TARGET_NAME alx-home_windows
         src/Shortcuts.cpp
         src/Lock.cpp
         src/Process.cpp
+        src/JumpList.cpp
 
     COMPILE_OPTIONS
         -D_AFXDLL

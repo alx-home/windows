@@ -40,9 +40,11 @@ struct Process {
 };
 
 Process NewProcess(
-   std::string_view                       name,
-   std::optional<std::string>             args = std::nullopt,
-   std::optional<std::string_view> const& cwd  = std::nullopt
+  std::string_view                       name,
+  std::optional<std::string>             args = std::nullopt,
+  std::optional<std::string_view> const& cwd  = std::nullopt
 );
+
+std::string GetExecutablePath();
 
 }  // namespace win32

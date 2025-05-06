@@ -24,6 +24,7 @@ SOFTWARE.
 
 #include "windows/Process.h"
 
+#include <minwindef.h>
 #include <utils/String.h>
 #include <synchapi.h>
 #include <optional>
@@ -72,6 +73,15 @@ NewProcess(
    );
 
    return {.handle_ = pi.hProcess, .thread_ = pi.hThread};
+}
+
+std::string
+GetExecutablePath() {
+   std::string result;
+   result.resize(MAX_PATH);
+   result.resize(GetModuleFileName(nullptr, result.data(), result.size()));
+
+   return result;
 }
 
 }  // namespace win32
