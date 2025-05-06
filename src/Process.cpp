@@ -38,9 +38,9 @@ Process::~Process() {
 
 Process
 NewProcess(
-   std::string_view                       name,
-   std::optional<std::string>             args,
-   std::optional<std::string_view> const& cwd
+  std::string_view                       name,
+  std::optional<std::string>             args,
+  std::optional<std::string_view> const& cwd
 ) {
 
    // additional information
@@ -52,18 +52,23 @@ NewProcess(
    // set the size of the structures
    si.cb = sizeof(si);
 
+   std::string cmd_line;
+   if (args) {
+      cmd_line = std::string{name} + " " + *args;
+   }
+
    // start the program up
    CreateProcess(
-      name.data(),
-      args ? args->data() : nullptr,
-      nullptr,
-      nullptr,
-      FALSE,
-      0,
-      nullptr,
-      cwd ? cwd->data() : nullptr,
-      &si,
-      &pi
+     name.data(),
+     args ? cmd_line.data() : nullptr,
+     nullptr,
+     nullptr,
+     FALSE,
+     0,
+     nullptr,
+     cwd ? cwd->data() : nullptr,
+     &si,
+     &pi
    );
 
    return {.handle_ = pi.hProcess, .thread_ = pi.hThread};
