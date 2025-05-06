@@ -24,6 +24,9 @@ SOFTWARE.
 
 #pragma once
 
+#include "utils/String.h"
+#include <optional>
+#include <string_view>
 #ifdef _WIN32
 
 #   include "Window.h"
@@ -32,7 +35,7 @@ namespace win32 {
 
 template <String CLASS_NAME, message_handler SELF>
 static constexpr WinPtr
-CreateMessageWindow(SELF& self, HINSTANCE parent) {
+CreateMessageWindow(SELF& self, std::optional<std::string_view> const& name, HINSTANCE parent) {
    static auto s__registered_class [[maybe_unused]]{[]() constexpr {
       auto const class_name{utils::WidenString(CLASS_NAME.value_.data())};
 
@@ -41,53 +44,58 @@ CreateMessageWindow(SELF& self, HINSTANCE parent) {
       message_class.hInstance     = GetModuleHandle(nullptr);
       message_class.lpszClassName = class_name.c_str();
       message_class.lpfnWndProc =
-         (WNDPROC)(+[](HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) -> LRESULT {
-            SELF* self{};
+        (WNDPROC)(+[](HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) -> LRESULT {
+           SELF* self{};
 
-            if (msg == WM_NCCREATE) {
-               auto* lpcs{reinterpret_cast<LPCREATESTRUCT>(lp)};
-               self = static_cast<SELF*>(lpcs->lpCreateParams);
-               SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(self));
-            } else {
-               self = reinterpret_cast<SELF*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
-            }
+           if (msg == WM_NCCREATE) {
+              auto* lpcs{reinterpret_cast<LPCREATESTRUCT>(lp)};
+              self = static_cast<SELF*>(lpcs->lpCreateParams);
+              SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(self));
+           } else {
+              self = reinterpret_cast<SELF*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+           }
 
-            if (!self) {
-               return DefWindowProcW(hwnd, msg, wp, lp);
-            }
+           if (!self) {
+              return DefWindowProcW(hwnd, msg, wp, lp);
+           }
 
-            switch (msg) {
-               case WM_DESTROY:
-                  SetWindowLongPtrW(hwnd, GWLP_USERDATA, 0);
-                  [[fallthrough]];
+           switch (msg) {
+              case WM_DESTROY:
+                 SetWindowLongPtrW(hwnd, GWLP_USERDATA, 0);
+                 [[fallthrough]];
 
-               default:
-                  return self->OnMessage(hwnd, msg, wp, lp);
-            }
+              default:
+                 return self->OnMessage(hwnd, msg, wp, lp);
+           }
 
-            return 0;
-         });
+           return 0;
+        });
 
       RegisterClassExW(&message_class);
       return class_name;
    }()};
 
+   std::wstring wname;
+   if (name) {
+      wname = utils::WidenString(*name);
+   }
+
    return std::unique_ptr<std::remove_pointer_t<HWND>, BOOL (*)(HWND)>{
-      CreateWindowExW(
-         0,
-         s__registered_class.c_str(),
-         nullptr,
-         0,
-         0,
-         0,
-         0,
-         0,
-         HWND_MESSAGE,
-         nullptr,
-         parent,
-         &self
-      ),
-      DestroyWindow
+     CreateWindowExW(
+       0,
+       s__registered_class.c_str(),
+       name ? wname.data() : nullptr,
+       0,
+       0,
+       0,
+       0,
+       0,
+       HWND_MESSAGE,
+       nullptr,
+       parent,
+       &self
+     ),
+     DestroyWindow
    };
 }
 

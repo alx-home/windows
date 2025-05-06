@@ -29,6 +29,7 @@ SOFTWARE.
 #include "windows/SystemTray.h"
 #include "windows/Window.h"
 
+#include <string_view>
 #include <utils/String.inl>
 
 #include <libloaderapi.h>
@@ -47,12 +48,18 @@ uint32_t const SystemTray::TASKBAR_CALLBACK_MSG = ::RegisterWindowMessage("Taskb
 
 uint32_t SystemTray::s__uid = 0;
 
-SystemTray::SystemTray(std::string_view tool_tip, HICON icon, bool hidden, uint32_t uid)
+SystemTray::SystemTray(
+  std::string_view                       tool_tip,
+  std::optional<std::string_view> const& name,
+  HICON                                  icon,
+  bool                                   hidden,
+  uint32_t                               uid
+)
    : hidden_{hidden} {
    assert(tool_tip.size() < sizeof(notify_data_.szTip));
 
    // Create an invisible window
-   message_window_ = CreateMessageWindow<"system_tray">(*this);
+   message_window_ = CreateMessageWindow<"system_tray">(*this, name);
 
    notify_data_.cbSize           = sizeof(NOTIFYICONDATA);
    notify_data_.hWnd             = message_window_.get();

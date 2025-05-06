@@ -26,6 +26,7 @@ SOFTWARE.
 
 #include "Window.h"
 #include <functional>
+#include <optional>
 #ifdef _WIN32
 
 #   include <Windows.h>
@@ -41,10 +42,11 @@ public:
    static uint32_t s__uid;
 
    SystemTray(
-     std::string_view tool_tip,
-     HICON            icon   = 0,
-     bool             hidden = true,
-     uint32_t         uid    = ++s__uid
+     std::string_view                       tool_tip,
+     std::optional<std::string_view> const& name   = std::nullopt,
+     HICON                                  icon   = 0,
+     bool                                   hidden = true,
+     uint32_t                               uid    = ++s__uid
    );
 
    virtual ~SystemTray();
@@ -108,7 +110,8 @@ private:
    virtual LRESULT OnTrayNotification(WPARAM uID, LPARAM lEvent) = 0;
 
    template <String, message_handler SELF>
-   friend constexpr WinPtr CreateMessageWindow(SELF&, HINSTANCE);
+   friend constexpr WinPtr
+   CreateMessageWindow(SELF&, std::optional<std::string_view> const&, HINSTANCE);
 };
 
 }  // namespace win32

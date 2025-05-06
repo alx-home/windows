@@ -26,6 +26,8 @@ SOFTWARE.
 
 #ifdef _WIN32
 
+#   include <optional>
+#   include <string_view>
 #   include <memory>
 #   include <utils/String.h>
 
@@ -40,8 +42,11 @@ concept message_handler = requires(TYPE elem, HWND hwnd, UINT msg, WPARAM wp, LP
 using WinPtr = std::unique_ptr<std::remove_pointer_t<HWND>, BOOL (*)(HWND)>;
 
 template <String CLASS_NAME, message_handler SELF>
-static constexpr WinPtr
-CreateMessageWindow(SELF& self, HINSTANCE parent = GetModuleHandle(nullptr));
+static constexpr WinPtr CreateMessageWindow(
+  SELF&                                  self,
+  std::optional<std::string_view> const& name   = std::nullopt,
+  HINSTANCE                              parent = GetModuleHandle(nullptr)
+);
 
 }  // namespace win32
 
