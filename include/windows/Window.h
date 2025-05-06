@@ -63,7 +63,6 @@ public:
    void AddCategory(std::string_view name, std::vector<std::string> const& items);
    void AddTask(std::string_view title, std::string_view app, std::string_view args);
    void AddTaskSeparator();
-   void CommitTasks();
 
    static void Delete();
 
@@ -99,15 +98,15 @@ private:
       return result;
    }
 
-   bool init_failed_{false};
+   void CommitTasks();
+
+   bool failed_{false};
 
    Ptr<ICustomDestinationList> list_{
      Create<ICustomDestinationList>(CLSID_DestinationList, nullptr, CLSCTX_INPROC_SERVER)
    };
-   Ptr<IObjectCollection> tasks_{
-     Create<IObjectCollection>(CLSID_EnumerableObjectCollection, nullptr, CLSCTX_INPROC)
-   };
-   Ptr<IObjectArray> removed_{Init<IObjectArray>()};
+   Ptr<IObjectCollection> tasks_{Init<IObjectCollection>()};
+   Ptr<IObjectArray>      removed_{Init<IObjectArray>()};
 };
 
 }  // namespace win32
