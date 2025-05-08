@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.20)
 
 win32_library(TARGET_NAME alx-home_windows
-    FILES 
+    FILES
         src/Env.cpp
         src/SystemTray.cpp
         src/Shortcuts.cpp
         src/Lock.cpp
         src/Process.cpp
         src/JumpList.cpp
+        src/Files.cpp
 
     COMPILE_OPTIONS
         -D_AFXDLL
