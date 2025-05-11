@@ -59,16 +59,11 @@ CreateMessageWindow(SELF& self, std::optional<std::string_view> const& name, HIN
               return DefWindowProcW(hwnd, msg, wp, lp);
            }
 
-           switch (msg) {
-              case WM_DESTROY:
-                 SetWindowLongPtrW(hwnd, GWLP_USERDATA, 0);
-                 [[fallthrough]];
-
-              default:
-                 return self->OnMessage(hwnd, msg, wp, lp);
+           if (msg == WM_DESTROY) {
+              SetWindowLongPtrW(hwnd, GWLP_USERDATA, 0);
            }
 
-           return 0;
+           return self->OnMessage(hwnd, msg, wp, lp);
         });
 
       RegisterClassExW(&message_class);

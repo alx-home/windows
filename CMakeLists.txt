@@ -9,6 +9,7 @@ win32_library(TARGET_NAME alx-home_windows
         src/Process.cpp
         src/JumpList.cpp
         src/Files.cpp
+        src/Event.cpp
 
     COMPILE_OPTIONS
         -D_AFXDLL
