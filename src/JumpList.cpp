@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include "utils/Scopped.h"
 #include "utils/String.h"
 #include "windows/Window.h"
 
@@ -215,10 +216,7 @@ JumpList::AddTask(std::string_view title, std::string_view app, std::string_view
       return;
    }
 
-   struct ClearVariant {
-      PROPVARIANT& propvar_;
-      ~ClearVariant() { PropVariantClear(&propvar_); }
-   } _{.propvar_ = propvar};
+   ScopeExit _{[&propvar]() constexpr { PropVariantClear(&propvar); }};
 
    if (auto const hr = property_store->Commit(); !SUCCEEDED(hr)) {
       failed_ = true;
@@ -264,10 +262,8 @@ JumpList::AddTaskSeparator() {
       std::cerr << "Couldn't set task property value (" << GetLastError() << ")" << std::endl;
       return;
    }
-   struct ClearVariant {
-      PROPVARIANT& propvar_;
-      ~ClearVariant() { PropVariantClear(&propvar_); }
-   } _{.propvar_ = propvar};
+
+   ScopeExit _{[&propvar]() constexpr { PropVariantClear(&propvar); }};
 
    if (auto const hr = property_store->Commit(); !SUCCEEDED(hr)) {
       failed_ = true;
