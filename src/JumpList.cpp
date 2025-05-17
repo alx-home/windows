@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "utils/Scopped.h"
+#include "utils/Scoped.h"
 #include "utils/String.h"
 #include "windows/Window.h"
 
