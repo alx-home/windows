@@ -29,19 +29,44 @@ SOFTWARE.
 
 namespace win32 {
 
-Mutex::~Mutex() {
-   // Release the mutex
-   ReleaseMutex(handle_);
-   CloseHandle(handle_);
+Mutex::Mutex(HANDLE handle)
+   : handle_(handle) {}
+
+Mutex::Mutex(Mutex&& right) noexcept
+   : handle_(std::move(right)) {
+   right.handle_ = nullptr;
 }
 
-Lock
+Mutex&
+Mutex::operator=(Mutex&& right) noexcept {
+   handle_       = std::move(right.handle_);
+   right.handle_ = nullptr;
+   return *this;
+}
+
+Mutex::~Mutex() {
+   if (handle_) {
+      // Release the mutex
+      ReleaseMutex(handle_);
+      CloseHandle(handle_);
+   }
+}
+
+Mutex::operator bool() const { return handle_ != nullptr; }
+
+Mutex::operator HANDLE() const { return handle_; }
+
+Mutex
 CreateLock(std::string_view name) {
+   auto handle = CreateMutexW(nullptr, true, utils::WidenString(name).data());
+   if (GetLastError() == ERROR_ALREADY_EXISTS) {
+      ReleaseMutex(handle);
+      CloseHandle(handle);
+      handle = nullptr;
+   }
+
    // Create a named mutex
-   return {
-      .mutex_  = {.handle_ = CreateMutexW(nullptr, true, utils::WidenString(name).data())},
-      .result_ = GetLastError()
-   };
+   return handle;
 }
 
 }  // namespace win32

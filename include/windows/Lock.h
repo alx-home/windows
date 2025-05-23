@@ -30,17 +30,28 @@ SOFTWARE.
 
 namespace win32 {
 
-struct Mutex {
+class Mutex {
+private:
+   Mutex(HANDLE handle);
+
+public:
+   Mutex(Mutex&&) noexcept;
+   Mutex& operator=(Mutex&&) noexcept;
+   Mutex(Mutex const&)            = delete;
+   Mutex& operator=(Mutex const&) = delete;
+
+   Mutex() = default;
    ~Mutex();
 
-   HANDLE handle_;
+   operator bool() const;
+   operator HANDLE() const;
+
+private:
+   HANDLE handle_{nullptr};
+
+   friend Mutex CreateLock(std::string_view name);
 };
 
-struct Lock {
-   Mutex mutex_;
-   DWORD result_;
-};
-
-Lock CreateLock(std::string_view name);
+Mutex CreateLock(std::string_view name);
 
 }  // namespace win32
