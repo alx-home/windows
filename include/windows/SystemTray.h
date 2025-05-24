@@ -91,7 +91,6 @@ private:
    uint32_t       default_menu_id_{0};
    bool           default_menu_item_by_pos_{true};
    bool           show_icon_pending_{true};
-   uint32_t       saved_icon_{0};
    uint32_t       creation_flags_{0};
 
    HWND target_window_{nullptr};

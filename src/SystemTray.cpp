@@ -65,7 +65,7 @@ SystemTray::SystemTray(
    notify_data_.hWnd             = message_window_.get();
    notify_data_.uID              = uid;
    notify_data_.hIcon            = icon;
-   notify_data_.uFlags           = NIF_MESSAGE | NIF_TIP | (icon != 0 ? NIF_ICON : 0);
+   notify_data_.uFlags           = NIF_MESSAGE | NIF_TIP | (icon ? NIF_ICON : 0);
    notify_data_.uCallbackMessage = TASKBAR_CALLBACK_MSG;
 
    std::ranges::copy(tool_tip, notify_data_.szTip);
@@ -288,7 +288,7 @@ SystemTray::InstallIconPending() {  //@todo
    }
 
    // Reset the flags to what was used at creation
-   notify_data_.uFlags = creation_flags_;
+   notify_data_.uFlags = creation_flags_ | (notify_data_.hIcon ? NIF_ICON : 0);
 
    // Try and recreate the icon
    hidden_ = !Shell_NotifyIcon(NIM_ADD, &notify_data_);

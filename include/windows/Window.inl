@@ -85,7 +85,7 @@ CreateMessageWindow(SELF& self, std::optional<std::string_view> const& name, HIN
        0,
        0,
        0,
-       HWND_MESSAGE,
+       nullptr,
        nullptr,
        parent,
        &self
