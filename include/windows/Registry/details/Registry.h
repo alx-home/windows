@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2025 alx-home
+Copyright (c) 2025 Alexandre GARCIN
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -75,7 +75,7 @@ struct KeyHandler {
       Close();
 
       if (auto const status =
-             RegCreateKeyExA(hKey, lpSubKey, 0, nullptr, option, access, nullptr, &key_, nullptr);
+            RegCreateKeyExA(hKey, lpSubKey, 0, nullptr, option, access, nullptr, &key_, nullptr);
           status != ERROR_SUCCESS) {
          key_ = nullptr;
          return status;

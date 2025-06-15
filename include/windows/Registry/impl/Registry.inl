@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2025 alx-home
+Copyright (c) 2025 Alexandre GARCIN
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -69,8 +69,8 @@ template <class SELF>
 constexpr void
 Key<STORE, PATH, PARENT_KEY, OWNED>::Apply(this SELF&& self, auto&& apply) {
    std::apply(
-      [&]<_key... KEY>(KEY&&... ptr) constexpr { (apply((self.*ptr).key_), ...); },
-      std::remove_cvref_t<SELF>::KEYS
+     [&]<_key... KEY>(KEY&&... ptr) constexpr { (apply((self.*ptr).key_), ...); },
+     std::remove_cvref_t<SELF>::KEYS
    );
 }
 
@@ -79,17 +79,17 @@ template <class SELF>
 constexpr void
 Key<STORE, PATH, PARENT_KEY, OWNED>::ApplyToOwned(this SELF&& self, auto&& apply) {
    std::apply(
-      [&]<_key... KEY>(KEY&&... ptr) constexpr {
-         (
-            [&]<_key KEY2>(KEY2&& member) constexpr {
-               if constexpr (std::_Remove_cvref_t<KEY2>::IS_OWNED) {
-                  apply(member);
-               }
-            }((self.*ptr).key_),
-            ...
-         );
-      },
-      std::remove_cvref_t<SELF>::keys_
+     [&]<_key... KEY>(KEY&&... ptr) constexpr {
+        (
+          [&]<_key KEY2>(KEY2&& member) constexpr {
+             if constexpr (std::_Remove_cvref_t<KEY2>::IS_OWNED) {
+                apply(member);
+             }
+          }((self.*ptr).key_),
+          ...
+        );
+     },
+     std::remove_cvref_t<SELF>::keys_
    );
 }
 
@@ -124,7 +124,7 @@ constexpr std::pair<LSTATUS, details::Key>
 Key<STORE, PATH, PARENT_KEY, OWNED>::Open(REGSAM acces, uint32_t ulOptions) {
    details::Key hkey{};
    auto const   result =
-      hkey.Open(store_value<Key::STORE_VALUE>, Key::FullPath().c_str(), ulOptions, acces);
+     hkey.Open(store_value<Key::STORE_VALUE>, Key::FullPath().c_str(), ulOptions, acces);
    return {result, hkey};
 }
 
@@ -140,14 +140,14 @@ Key<STORE, PATH, PARENT_KEY, OWNED>::Ensure() {
 
       auto const parent = ParentPath();
       if (auto const status =
-             hkey.Open(store_value<STORE_VALUE>, parent.c_str(), 0, KEY_ALL_ACCESS);
+            hkey.Open(store_value<STORE_VALUE>, parent.c_str(), 0, KEY_ALL_ACCESS);
           status != ERROR_SUCCESS) {
          return {status, hkey};
       }
 
       auto const KEY_PATH = Key::FullPath();
       auto const status   = hkey.Create(
-         store_value<STORE_VALUE>, KEY_PATH.c_str(), REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS
+        store_value<STORE_VALUE>, KEY_PATH.c_str(), REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS
       );
       return {status, hkey};
    } else {
@@ -157,8 +157,8 @@ Key<STORE, PATH, PARENT_KEY, OWNED>::Ensure() {
 
 template <Store STORE, String PATH, class PARENT_KEY, bool OWNED>
 constexpr std::pair<
-   typename Key<STORE, PATH, PARENT_KEY, OWNED>::num_key_t,
-   typename Key<STORE, PATH, PARENT_KEY, OWNED>::num_value_t>
+  typename Key<STORE, PATH, PARENT_KEY, OWNED>::num_key_t,
+  typename Key<STORE, PATH, PARENT_KEY, OWNED>::num_value_t>
 Key<STORE, PATH, PARENT_KEY, OWNED>::Info() {
    auto [status, hKey] = Key::Open(KEY_QUERY_VALUE);
 
@@ -167,8 +167,8 @@ Key<STORE, PATH, PARENT_KEY, OWNED>::Info() {
          return {0, 0};
       }
       throw AccessError{
-         "Registry: Couldn't open key \"" + store_name_s<STORE>
-         + "\\" + FullPath() + "\", error: " + std::to_string(status) + "!"
+        "Registry: Couldn't open key \"" + store_name_s<STORE>
+        + "\\" + FullPath() + "\", error: " + std::to_string(status) + "!"
       };
    }
 
@@ -177,23 +177,23 @@ Key<STORE, PATH, PARENT_KEY, OWNED>::Info() {
    DWORD subkeys;
    DWORD values;
    if (auto const status = RegQueryInfoKey(
-          hKey.Handle(),
-          nullptr,
-          nullptr,
-          nullptr,
-          &subkeys,
-          nullptr,
-          nullptr,
-          &values,
-          nullptr,
-          nullptr,
-          nullptr,
-          0
+         hKey.Handle(),
+         nullptr,
+         nullptr,
+         nullptr,
+         &subkeys,
+         nullptr,
+         nullptr,
+         &values,
+         nullptr,
+         nullptr,
+         nullptr,
+         0
        );
        status != ERROR_SUCCESS) {
       throw AccessError{
-         "Registry: Couldn't open key \"" + store_name_s<STORE>
-         + "\\" + FullPath() + "\", error: " + std::to_string(status) + "!"
+        "Registry: Couldn't open key \"" + store_name_s<STORE>
+        + "\\" + FullPath() + "\", error: " + std::to_string(status) + "!"
       };
    }
 
@@ -222,7 +222,7 @@ Key<STORE, PATH, PARENT_KEY, OWNED>::Delete(this SELF&&) {
 
    details::Key key{};
    if (key.Open(
-          store_value<STORE>, KEY_PATH.c_str(), 0, DELETE | KEY_ENUMERATE_SUB_KEYS | KEY_QUERY_VALUE
+         store_value<STORE>, KEY_PATH.c_str(), 0, DELETE | KEY_ENUMERATE_SUB_KEYS | KEY_QUERY_VALUE
        )
        == ERROR_SUCCESS) {
       RegDeleteTree(key.Handle(), nullptr);
@@ -256,8 +256,8 @@ Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
    auto [status, hKey] = KEY::Ensure();
    if (!hKey) {
       throw AccessError{
-         "Registry: Couldn't ensure key \"" + store_name_s<KEY::STORE_VALUE>
-         + "\\" + KEY::FullPath() + "\", error: " + std::to_string(status) + "!"
+        "Registry: Couldn't ensure key \"" + store_name_s<KEY::STORE_VALUE>
+        + "\\" + KEY::FullPath() + "\", error: " + std::to_string(status) + "!"
       };
    }
 
@@ -266,17 +266,17 @@ Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
    if constexpr (std::is_constructible_v<std::string_view, TYPE>) {
       std::string_view value2{value};
       if (auto const status = RegSetValueExA(
-             hKey.Handle(),
-             name.c_str(),
-             0,
-             REG_SZ,
-             reinterpret_cast<BYTE const*>(value2.data()),
-             value2.size()
+            hKey.Handle(),
+            name.c_str(),
+            0,
+            REG_SZ,
+            reinterpret_cast<BYTE const*>(value2.data()),
+            value2.size()
           );
           status != ERROR_SUCCESS) {
          throw AccessError{
-            "Registry: Couldn't set key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
+           "Registry: Couldn't set key value \"" + store_name_s<KEY::STORE_VALUE>
+           + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
          };
       }
    } else if constexpr (std::is_constructible_v<std::span<std::string_view>, TYPE>) {
@@ -287,12 +287,12 @@ Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
       }
 
       if (auto const status = RegSetValueExA(
-             hKey.Handle(), name.c_str(), 0, REG_MULTI_SZ, value2.data(), value2.size()
+            hKey.Handle(), name.c_str(), 0, REG_MULTI_SZ, value2.data(), value2.size()
           );
           status != ERROR_SUCCESS) {
          throw AccessError{
-            "Registry: Couldn't set key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
+           "Registry: Couldn't set key value \"" + store_name_s<KEY::STORE_VALUE>
+           + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
          };
       }
    } else if constexpr (std::is_constructible_v<uint32_t, TYPE>
@@ -300,17 +300,17 @@ Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
       uint32_t value2{value};
 
       if (auto const status = RegSetValueExA(
-             hKey.Handle(),
-             name.c_str(),
-             0,
-             REG_DWORD,
-             reinterpret_cast<BYTE const*>(&value2),
-             sizeof(value2)
+            hKey.Handle(),
+            name.c_str(),
+            0,
+            REG_DWORD,
+            reinterpret_cast<BYTE const*>(&value2),
+            sizeof(value2)
           );
           status != ERROR_SUCCESS) {
          throw AccessError{
-            "Registry: Couldn't set key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
+           "Registry: Couldn't set key value \"" + store_name_s<KEY::STORE_VALUE>
+           + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
          };
       }
    } else if constexpr (std::is_constructible_v<uint64_t, TYPE>
@@ -318,34 +318,34 @@ Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
       uint64_t value2{value};
 
       if (auto const status = RegSetValueExA(
-             hKey.Handle(),
-             name.c_str(),
-             0,
-             REG_QWORD,
-             reinterpret_cast<BYTE const*>(&value2),
-             sizeof(value2)
+            hKey.Handle(),
+            name.c_str(),
+            0,
+            REG_QWORD,
+            reinterpret_cast<BYTE const*>(&value2),
+            sizeof(value2)
           );
           status != ERROR_SUCCESS) {
          throw AccessError{
-            "Registry: Couldn't set key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
+           "Registry: Couldn't set key value \"" + store_name_s<KEY::STORE_VALUE>
+           + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
          };
       }
    } else if constexpr (std::is_constructible_v<std::span<std::byte>, TYPE>) {
       std::span<std::byte> value2{value};
 
       if (auto const status = RegSetValueExA(
-             hKey.Handle(),
-             name.c_str(),
-             0,
-             REG_BINARY,
-             reinterpret_cast<BYTE const*>(value2.data()),
-             value2.size()
+            hKey.Handle(),
+            name.c_str(),
+            0,
+            REG_BINARY,
+            reinterpret_cast<BYTE const*>(value2.data()),
+            value2.size()
           );
           status != ERROR_SUCCESS) {
          throw AccessError{
-            "Registry: Couldn't set key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
+           "Registry: Couldn't set key value \"" + store_name_s<KEY::STORE_VALUE>
+           + "\\" + KEY::FullPath() + "\\" + name + ", error: " + std::to_string(status) + "!"
          };
       }
    } else {
@@ -355,7 +355,8 @@ Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
    return *this;
 }
 
-template <class TYPE, _key KEY, String KEY_NAME> Value<TYPE, KEY, KEY_NAME>::operator bool() const {
+template <class TYPE, _key KEY, String KEY_NAME>
+Value<TYPE, KEY, KEY_NAME>::operator bool() const {
    auto [status, hKey] = KEY::Open(KEY_QUERY_VALUE);
    if (!hKey) {
       if (status == ERROR_FILE_NOT_FOUND) {
@@ -363,22 +364,22 @@ template <class TYPE, _key KEY, String KEY_NAME> Value<TYPE, KEY, KEY_NAME>::ope
       }
 
       throw AccessError{
-         "Registry: Couldn't open key \"" + store_name_s<KEY::STORE_VALUE>
-         + "\\" + KEY::FullPath() + ", error: " + std::to_string(status) + "!"
+        "Registry: Couldn't open key \"" + store_name_s<KEY::STORE_VALUE>
+        + "\\" + KEY::FullPath() + ", error: " + std::to_string(status) + "!"
       };
    }
 
    std::string const name{VALUE_NAME.value_.data()};
    DWORD             size{};
    if (auto const status =
-          RegGetValueA(hKey.Handle(), "", name.c_str(), RRF_RT_ANY, NULL, nullptr, &size);
+         RegGetValueA(hKey.Handle(), "", name.c_str(), RRF_RT_ANY, NULL, nullptr, &size);
        status != ERROR_SUCCESS) {
       if (status == ERROR_FILE_NOT_FOUND) {
          return false;
       }
       throw AccessError{
-         "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-         + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
+        "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
+        + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
       };
    }
 
@@ -391,8 +392,8 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
    auto [status, hKey] = KEY::Open(KEY_QUERY_VALUE);
    if (!hKey) {
       throw AccessError{
-         "Registry: Couldn't open key \"" + store_name_s<KEY::STORE_VALUE>
-         + "\\" + KEY::FullPath() + ", error: " + std::to_string(status) + "!"
+        "Registry: Couldn't open key \"" + store_name_s<KEY::STORE_VALUE>
+        + "\\" + KEY::FullPath() + ", error: " + std::to_string(status) + "!"
       };
    }
 
@@ -401,22 +402,21 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
       std::string value{};
       DWORD       size{};
       if (auto const status =
-             RegGetValueA(hKey.Handle(), "", name.c_str(), RRF_RT_REG_SZ, NULL, nullptr, &size);
+            RegGetValueA(hKey.Handle(), "", name.c_str(), RRF_RT_REG_SZ, NULL, nullptr, &size);
           status != ERROR_SUCCESS) {
          throw AccessError{
-            "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
+           "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
+           + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
          };
       }
 
       value.resize(size - 1);
-      if (auto const status = RegGetValueA(
-             hKey.Handle(), "", name.c_str(), RRF_RT_REG_SZ, NULL, value.data(), &size
-          );
+      if (auto const status =
+            RegGetValueA(hKey.Handle(), "", name.c_str(), RRF_RT_REG_SZ, NULL, value.data(), &size);
           status != ERROR_SUCCESS) {
          throw AccessError{
-            "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
+           "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
+           + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
          };
       }
 
@@ -427,23 +427,23 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
       DWORD       size{};
 
       if (auto const status = RegGetValueA(
-             hKey.Handle(), "", name.c_str(), RRF_RT_REG_MULTI_SZ, NULL, nullptr, &size
+            hKey.Handle(), "", name.c_str(), RRF_RT_REG_MULTI_SZ, NULL, nullptr, &size
           );
           status != ERROR_SUCCESS) {
          throw AccessError{
-            "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
+           "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
+           + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
          };
       }
 
       value.resize(size - 1);
       if (auto const status = RegGetValueA(
-             hKey.Handle(), "", name.c_str(), RRF_RT_REG_MULTI_SZ, NULL, value.data(), &size
+            hKey.Handle(), "", name.c_str(), RRF_RT_REG_MULTI_SZ, NULL, value.data(), &size
           );
           status != ERROR_SUCCESS) {
          throw AccessError{
-            "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
+           "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
+           + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
          };
       }
 
@@ -464,11 +464,11 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
       uint32_t value{};
       DWORD    size = sizeof(value);
       if (auto const status =
-             RegGetValueA(hKey.Handle(), "", name.c_str(), RRF_RT_REG_DWORD, NULL, &value, &size);
+            RegGetValueA(hKey.Handle(), "", name.c_str(), RRF_RT_REG_DWORD, NULL, &value, &size);
           status != ERROR_SUCCESS) {
          throw AccessError{
-            "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
+           "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
+           + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
          };
       }
 
@@ -478,11 +478,11 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
       uint64_t value{};
       DWORD    size = sizeof(value);
       if (auto const status =
-             RegGetValueA(hKey.Handle(), "", name.c_str(), RRF_RT_REG_QWORD, NULL, &value, &size);
+            RegGetValueA(hKey.Handle(), "", name.c_str(), RRF_RT_REG_QWORD, NULL, &value, &size);
           status != ERROR_SUCCESS) {
          throw AccessError{
-            "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
+           "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
+           + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
          };
       }
 
@@ -491,22 +491,22 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
       std::vector<std::byte> value{};
       DWORD                  size{};
       if (auto const status =
-             RegGetValueA(hKey.Handle(), "", name.c_str(), RRF_RT_REG_BINARY, NULL, nullptr, &size);
+            RegGetValueA(hKey.Handle(), "", name.c_str(), RRF_RT_REG_BINARY, NULL, nullptr, &size);
           status != ERROR_SUCCESS) {
          throw AccessError{
-            "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
+           "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
+           + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
          };
       }
 
       value.resize(size);
       if (auto const status = RegGetValueA(
-             hKey.Handle(), "", name.c_str(), RRF_RT_REG_BINARY, NULL, value.data(), &size
+            hKey.Handle(), "", name.c_str(), RRF_RT_REG_BINARY, NULL, value.data(), &size
           );
           status != ERROR_SUCCESS) {
          throw AccessError{
-            "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
-            + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
+           "Registry: Couldn't get key value \"" + store_name_s<KEY::STORE_VALUE>
+           + "\\" + KEY::FullPath() + "\\" + name + "\", error: " + std::to_string(status) + "!"
          };
       }
 

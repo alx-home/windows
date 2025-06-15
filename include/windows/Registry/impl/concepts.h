@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2025 alx-home
+Copyright (c) 2025 Alexandre GARCIN
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -37,9 +37,11 @@ namespace registry {
 using namespace utils;
 
 enum class Store : std::size_t;
-template <Store STORE, String PATH, class PARENT_KEY, bool OWNED = false> struct Key;
+template <Store STORE, String PATH, class PARENT_KEY, bool OWNED = false>
+struct Key;
 
-template <class TYPE> struct IsKey : std::false_type {};
+template <class TYPE>
+struct IsKey : std::false_type {};
 
 template <Store STORE, String PATH, class PARENT_KEY, bool OWNED>
 struct IsKey<Key<STORE, PATH, PARENT_KEY, OWNED>> : std::true_type {};
@@ -47,9 +49,11 @@ struct IsKey<Key<STORE, PATH, PARENT_KEY, OWNED>> : std::true_type {};
 template <class TYPE>
 concept _key = requires { IsKey<TYPE>::value; };
 
-template <class TYPE, _key KEY, String NAME> struct Value;
+template <class TYPE, _key KEY, String NAME>
+struct Value;
 
-template <class TYPE> struct IsValue : std::false_type {};
+template <class TYPE>
+struct IsValue : std::false_type {};
 
 template <class VALUE_TYPE, class KEY_TYPE, String NAME>
 struct IsValue<Value<VALUE_TYPE, KEY_TYPE, NAME>> : std::true_type {};
@@ -57,20 +61,26 @@ struct IsValue<Value<VALUE_TYPE, KEY_TYPE, NAME>> : std::true_type {};
 template <class TYPE>
 concept _value = requires { IsValue<TYPE>::value; };
 
-template <_value... VALUE> using Values = std::tuple<VALUE...>;
+template <_value... VALUE>
+using Values = std::tuple<VALUE...>;
 
-template <_key KEY> class KeyPtr;
+template <_key KEY>
+class KeyPtr;
 
-template <class TYPE> struct IsKeyPtr : std::false_type {};
+template <class TYPE>
+struct IsKeyPtr : std::false_type {};
 
-template <_key KEY> struct IsKeyPtr<KeyPtr<KEY>> : std::true_type {};
+template <_key KEY>
+struct IsKeyPtr<KeyPtr<KEY>> : std::true_type {};
 
 template <class TYPE>
 concept _key_ptr = requires { IsKeyPtr<TYPE>::value; };
 
-template <_key... KEY> using Keys = std::tuple<KEY...>;
+template <_key... KEY>
+using Keys = std::tuple<KEY...>;
 
-template <_key_ptr... KEY_PTR> using KeysPtr = std::tuple<KEY_PTR...>;
+template <_key_ptr... KEY_PTR>
+using KeysPtr = std::tuple<KEY_PTR...>;
 
 enum class Store : std::size_t { EHKEY_CURRENT_USER, EHKEY_LOCAL_MACHINE };
 

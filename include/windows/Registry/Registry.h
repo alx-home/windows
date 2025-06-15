@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2025 alx-home
+Copyright (c) 2025 Alexandre GARCIN
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,8 @@ static constexpr auto store_name = []() constexpr {
    }
 }();
 
-template <Store store, _key Impl> class Registry : public Impl {
+template <Store store, _key Impl>
+class Registry : public Impl {
 public:
    static constexpr auto KEY_PATH = store_name<store>.value_;
 

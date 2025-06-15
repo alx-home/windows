@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2025 alx-home
+Copyright (c) 2025 Alexandre GARCIN
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,8 @@ struct AccessError : Exception {
 };
 
 enum class Store : std::size_t;
-template <Store STORE, String PATH, class PARENT_KEY, bool OWNED> struct Key {
+template <Store STORE, String PATH, class PARENT_KEY, bool OWNED>
+struct Key {
 public:
    static constexpr auto STORE_VALUE = STORE;
    static constexpr auto IS_OWNED    = OWNED;
@@ -54,14 +55,18 @@ public:
    static constexpr std::string FullPath();
    static constexpr std::string ParentPath();
    static constexpr std::string KeyName();
-   template <class SELF> void   Clear(this SELF&& self);
+   template <class SELF>
+   void Clear(this SELF&& self);
 
-   template <class SELF> void Delete(this SELF&& self);
+   template <class SELF>
+   void Delete(this SELF&& self);
 
 protected:
-   template <class SELF> constexpr void Apply(this SELF&& self, auto&& apply);
+   template <class SELF>
+   constexpr void Apply(this SELF&& self, auto&& apply);
 
-   template <class SELF> constexpr void ApplyToOwned(this SELF&& self, auto&& apply);
+   template <class SELF>
+   constexpr void ApplyToOwned(this SELF&& self, auto&& apply);
 
    static constexpr std::pair<LSTATUS, details::Key> Ensure();
    using num_key_t   = uint32_t;
@@ -69,11 +74,14 @@ protected:
    static constexpr std::pair<num_key_t, num_value_t> Info();
    static constexpr std::pair<LSTATUS, details::Key>  Open(REGSAM acces, uint32_t ulOptions = 0);
 
-   template <class, _key, String> friend struct Value;
-   template <Store, String, class, bool> friend struct Key;
+   template <class, _key, String>
+   friend struct Value;
+   template <Store, String, class, bool>
+   friend struct Key;
 };
 
-template <class TYPE, _key KEY, String NAME> struct Value {
+template <class TYPE, _key KEY, String NAME>
+struct Value {
    static constexpr auto VALUE_NAME = NAME;
 
    template <class TYPE2>
@@ -88,7 +96,8 @@ template <class TYPE, _key KEY, String NAME> struct Value {
    TYPE     operator*() const;
 };
 
-template <_key KEY> class KeyPtr {
+template <_key KEY>
+class KeyPtr {
 public:
    KeyPtr() = default;
 
@@ -101,7 +110,8 @@ public:
 private:
    KEY key_{};
 
-   template <Store STORE, String PATH, class PARENT_KEY, bool OWNED> friend struct registry::Key;
+   template <Store STORE, String PATH, class PARENT_KEY, bool OWNED>
+   friend struct registry::Key;
 };
 
 }  // namespace registry
