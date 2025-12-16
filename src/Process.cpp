@@ -104,7 +104,7 @@ concept span_convertible = requires(T t) { std::span{t}; };
 constexpr auto
 CopySpan(
   std::span<std::byte const>                 span,
-  std::span<std::byte const>::const_iterator it,
+  std::span<std::byte const>::iterator       it,
   auto*                                      out
 ) {
    return std::ranges::copy_n(
@@ -118,7 +118,7 @@ template <class T>
 constexpr auto
 CopySpan(
   std::span<std::byte const>                 span,
-  std::span<std::byte const>::const_iterator it,
+  std::span<std::byte const>::iterator       it,
   std::span<T>                               out
 ) {
    auto const size = sizeof(T) * out.size();

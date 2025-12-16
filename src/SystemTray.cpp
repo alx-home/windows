@@ -22,8 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <WinSock2.h>
 #include <afxtempl.h>
+#include <WinSock2.h>
 #include <afxdisp.h>
 
 #include "windows/SystemTray.h"
