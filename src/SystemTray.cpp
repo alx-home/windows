@@ -22,9 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <afxtempl.h>
 #include <WinSock2.h>
-#include <afxdisp.h>
 
 #include "windows/SystemTray.h"
 #include "windows/Window.h"
@@ -311,7 +309,7 @@ FindTrayWnd(HWND handle, LPARAM lParam) {
 
    // Did we find the Main System Tray? If so, then get its size and keep going
    if (class_name == "TrayNotifyWnd") {
-      ::GetWindowRect(handle, reinterpret_cast<CRect*>(lParam));
+      ::GetWindowRect(handle, reinterpret_cast<RECT*>(lParam));
 
       EnumChildWindows(handle, FindTrayWnd, lParam);
       return true;
@@ -320,10 +318,10 @@ FindTrayWnd(HWND handle, LPARAM lParam) {
    // Did we find the System Clock? If so, then adjust the size of the rectangle
    // we have and quit (clock will be found after the system tray)
    if (class_name == "TrayClockWClass") {
-      auto* rect = reinterpret_cast<CRect*>(lParam);
-      CRect rect_clock{};
+      auto* rect = reinterpret_cast<RECT*>(lParam);
+      RECT  rect_clock{};
 
-      ::GetWindowRect(handle, rect_clock);
+      ::GetWindowRect(handle, &rect_clock);
 
       // if clock is above system tray adjust accordingly
       if (rect_clock.bottom < rect->bottom - 5) {  // 10 = random fudge factor.
@@ -345,7 +343,7 @@ SystemTray::GetTrayWndRect() {
 
    RECT rect{};
 
-   auto tray_window = ::FindWindow(_T("Shell_TrayWnd"), nullptr);
+   auto tray_window = ::FindWindow(TEXT("Shell_TrayWnd"), nullptr);
    if (tray_window) {
       ::GetWindowRect(tray_window, &rect);
       EnumChildWindows(tray_window, FindTrayWnd, reinterpret_cast<LPARAM>(&rect));
