@@ -102,11 +102,7 @@ template <class T>
 concept span_convertible = requires(T t) { std::span{t}; };
 
 constexpr auto
-CopySpan(
-  std::span<std::byte const>                 span,
-  std::span<std::byte const>::iterator       it,
-  auto*                                      out
-) {
+CopySpan(std::span<std::byte const> span, std::span<std::byte const>::iterator it, auto* out) {
    return std::ranges::copy_n(
      span.subspan(std::distance(span.begin(), it), sizeof(out)).begin(),
      sizeof(out),
@@ -117,9 +113,9 @@ CopySpan(
 template <class T>
 constexpr auto
 CopySpan(
-  std::span<std::byte const>                 span,
-  std::span<std::byte const>::iterator       it,
-  std::span<T>                               out
+  std::span<std::byte const>           span,
+  std::span<std::byte const>::iterator it,
+  std::span<T>                         out
 ) {
    auto const size = sizeof(T) * out.size();
 
@@ -253,7 +249,7 @@ DoRelocation(
             auto const reloc_type = (offset & 0xF000) >> 12;
 
             if (reloc_type == 3) {
-               code_location += delta;  // @fixme
+               code_location += static_cast<uint32_t>(delta);  // @fixme
             } else {
                throw std::runtime_error(std::format("Unknown relocation type = {}", reloc_type));
             }
@@ -283,32 +279,33 @@ DoFork(
 
    std::span new_addr{std::bit_cast<std::byte*>(proc_info.base_addr_), proc_info.image_size_};
 
-   if (pe_ext_header.image_base_ == std::bit_cast<uint64_t>(proc_info.base_addr_)
-       && image_size <= proc_info.image_size_) {
+   if (
+     pe_ext_header.image_base_ == std::bit_cast<uint64_t>(proc_info.base_addr_)
+     && image_size <= proc_info.image_size_
+   ) {
       // if new EXE has same baseaddr and is its size is <= to the original EXE, just
       // overwrite it in memory
       DWORD old_protect;
       VirtualProtectEx(
         proc.handle_,
-        reinterpret_cast<void*>(proc_info.base_addr_),
+        proc_info.base_addr_,
         proc_info.image_size_,
         PAGE_EXECUTE_READWRITE,
         &old_protect
       );
    } else {
       // get address of ZwUnmapViewOfSection
-      auto const pZwUnmapViewOfSection =
-        reinterpret_cast<PTRZwUnmapViewOfSection>(reinterpret_cast<void*>(
-          GetProcAddress(GetModuleHandle("ntdll.dll"), "ZwUnmapViewOfSection")
-        ));
+      auto const pZwUnmapViewOfSection = reinterpret_cast<PTRZwUnmapViewOfSection>(
+        GetProcAddress(GetModuleHandle("ntdll.dll"), "ZwUnmapViewOfSection")
+      );
 
       // try to unmap the original EXE image
-      if (pZwUnmapViewOfSection(pi.hProcess, reinterpret_cast<void*>(proc_info.base_addr_)) == 0) {
+      if (pZwUnmapViewOfSection(pi.hProcess, proc_info.base_addr_) == 0) {
          // allocate memory for the new EXE image at the prefered imagebase.
          new_addr = {
            std::bit_cast<std::byte*>(VirtualAllocEx(
              proc.handle_,
-             reinterpret_cast<void*>(pe_ext_header.image_base_),
+             reinterpret_cast<void*>(static_cast<uintptr_t>(pe_ext_header.image_base_)),
              image_size,
              MEM_RESERVE | MEM_COMMIT,
              PAGE_EXECUTE_READWRITE
@@ -376,7 +373,8 @@ DoFork(
          } else {
             // in this case, the DLL was not loaded at the baseaddr, i.e. manual relocation was
             // performed.
-            ctx.Rax = std::bit_cast<uint64_t>(&new_addr[pe_ext_header.address_of_entry_point_]
+            ctx.Rax = std::bit_cast<uint64_t>(
+              &new_addr[pe_ext_header.address_of_entry_point_]
             );  // eax holds new entry point
          }
 
@@ -401,7 +399,7 @@ NewProcessFromMemory(
   std::optional<std::string_view> const& cwd
 ) {
    auto const proc = NewProcess("", std::string{name} + (args ? " " + *args : ""), cwd, true);
-   auto const throw_error = [&]() constexpr {
+   auto const throw_error = [&]() {
       throw std::runtime_error(
         std::format(
           "Couldn't create process \"{}{}\" ({}) !", name, args ? (" " + *args) : "", GetLastError()
@@ -498,7 +496,11 @@ std::string
 GetExecutablePath() {
    std::string result;
    result.resize(MAX_PATH);
-   result.resize(GetModuleFileName(nullptr, result.data(), result.size()));
+   result.resize(
+     static_cast<std::size_t>(
+       GetModuleFileName(nullptr, result.data(), static_cast<DWORD>(result.size()))
+     )
+   );
 
    return result;
 }

@@ -91,8 +91,10 @@ JumpList::IsRemoved(IShellItem* item) {
             compare.reset(pcompare);
 
             int order;
-            if (auto res = pcompare->Compare(item, SICHINT_CANONICAL, &order);
-                SUCCEEDED(res) && (0 == order)) {
+            if (
+              auto res = pcompare->Compare(item, SICHINT_CANONICAL, &order);
+              SUCCEEDED(res) && (0 == order)
+            ) {
                return true;
             }
          }
@@ -122,10 +124,12 @@ JumpList::AddCategory(std::string_view name, std::vector<std::string> const& ite
       auto        shell_item{Init<IShellItem>()};
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wlanguage-extension-token"
-      if (auto const hr = SHCreateItemInKnownFolder(
-            FOLDERID_Documents, KF_FLAG_DEFAULT, witem.data(), IID_PPV_ARGS(&psi)
-          );
-          !SUCCEEDED(hr)) {
+      if (
+        auto const hr = SHCreateItemInKnownFolder(
+          FOLDERID_Documents, KF_FLAG_DEFAULT, witem.data(), IID_PPV_ARGS(&psi)
+        );
+        !SUCCEEDED(hr)
+      ) {
 #pragma clang diagnostic pop
          failed_ = true;
          std::cerr << "Couldn't create ishellitem for item " << item << " (" << hr << ")"
@@ -216,7 +220,7 @@ JumpList::AddTask(std::string_view title, std::string_view app, std::string_view
       return;
    }
 
-   ScopeExit _{[&propvar]() constexpr { PropVariantClear(&propvar); }};
+   ScopeExit _{[&propvar]() { PropVariantClear(&propvar); }};
 
    if (auto const hr = property_store->Commit(); !SUCCEEDED(hr)) {
       failed_ = true;
@@ -256,14 +260,16 @@ JumpList::AddTaskSeparator() {
       return;
    }
 
-   if (auto const hr = property_store->SetValue(PKEY_AppUserModel_IsDestListSeparator, propvar);
-       !SUCCEEDED(hr)) {
+   if (
+     auto const hr = property_store->SetValue(PKEY_AppUserModel_IsDestListSeparator, propvar);
+     !SUCCEEDED(hr)
+   ) {
       failed_ = true;
       std::cerr << "Couldn't set task property value (" << GetLastError() << ")" << std::endl;
       return;
    }
 
-   ScopeExit _{[&propvar]() constexpr { PropVariantClear(&propvar); }};
+   ScopeExit _{[&propvar]() { PropVariantClear(&propvar); }};
 
    if (auto const hr = property_store->Commit(); !SUCCEEDED(hr)) {
       failed_ = true;

@@ -87,8 +87,10 @@ private:
 
 #   pragma clang diagnostic push
 #   pragma clang diagnostic ignored "-Wlanguage-extension-token"
-      if (auto hr = CoCreateInstance(std::forward<ARGS>(args)..., IID_PPV_ARGS(&presult));
-          SUCCEEDED(hr)) {
+      if (
+        auto hr = CoCreateInstance(std::forward<ARGS>(args)..., IID_PPV_ARGS(&presult));
+        SUCCEEDED(hr)
+      ) {
 #   pragma clang diagnostic pop
          result.reset(presult);
       } else {

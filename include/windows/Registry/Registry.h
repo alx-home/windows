@@ -42,7 +42,7 @@ static constexpr auto store_name = []() constexpr {
    } else if constexpr (store == EHKEY_LOCAL_MACHINE) {
       return MakePath<"HKEY_LOCAL_MACHINE">();
    } else {
-      static_assert(false, std::format("Unexpected store {}", static_cast<std::size_t>(store)));
+      static_assert(false, "Unexpected store");
    }
 }();
 

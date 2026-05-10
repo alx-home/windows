@@ -24,11 +24,11 @@ SOFTWARE.
 
 #pragma once
 
+#include <utils/Concepts.h>
 #include <utils/String.inl>
 
 #include <Windows.h>
 #include <winreg.h>
-#include <format>
 #include <tuple>
 #include <type_traits>
 
@@ -93,7 +93,7 @@ static auto store_value = []() constexpr {
    } else if constexpr (STORE == EHKEY_LOCAL_MACHINE) {
       return HKEY_LOCAL_MACHINE;
    } else {
-      static_assert(false, std::format("Unexpected store {}", static_cast<std::size_t>(STORE)));
+      static_assert(false, "Unexpected store");
    }
 }();
 

@@ -62,7 +62,7 @@ ReplaceAppData(std::string const& path) {
 
 std::string
 ReplaceLocalAppData(std::string const& path) {
-   static std::regex const& reg{"%LocalAppData%"};
+   static std::regex const reg{"%LocalAppData%"};
    return std::regex_replace(path, reg, GetAppData());
 }
 
