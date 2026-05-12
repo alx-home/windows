@@ -85,13 +85,17 @@ private:
       T*   presult;
       auto result{Init<T>()};
 
-#   pragma clang diagnostic push
-#   pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#   ifdef __clang__
+#      pragma clang diagnostic push
+#      pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#   endif
       if (
         auto hr = CoCreateInstance(std::forward<ARGS>(args)..., IID_PPV_ARGS(&presult));
         SUCCEEDED(hr)
       ) {
-#   pragma clang diagnostic pop
+#   ifdef __clang__
+#      pragma clang diagnostic pop
+#   endif
          result.reset(presult);
       } else {
          std::cerr << "Couldn't create object (" << GetLastError() << ")" << std::endl;

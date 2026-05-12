@@ -271,8 +271,9 @@ DoFork(
   ProcInfo const&      proc_info,
   Process const&       proc
 ) {
-   PROCESS_INFORMATION pi;
-   CONTEXT             ctx;
+   CONTEXT ctx{};
+   ctx.ContextFlags = CONTEXT_FULL;
+   GetThreadContext(proc.thread_, &ctx);
 
    // printf("Original EXE loaded (PID = %d).\n", pi.dwProcessId);
    // printf("Original Base Addr = %X, Size = %X\n", childInfo.baseAddr, childInfo.imageSize);
@@ -300,7 +301,7 @@ DoFork(
       );
 
       // try to unmap the original EXE image
-      if (pZwUnmapViewOfSection(pi.hProcess, proc_info.base_addr_) == 0) {
+      if (pZwUnmapViewOfSection(proc.handle_, proc_info.base_addr_) == 0) {
          // allocate memory for the new EXE image at the prefered imagebase.
          new_addr = {
            std::bit_cast<std::byte*>(VirtualAllocEx(

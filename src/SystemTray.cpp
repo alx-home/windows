@@ -304,7 +304,7 @@ BOOL CALLBACK
 FindTrayWnd(HWND handle, LPARAM lParam) {
    std::string class_name{};
    class_name.resize(255);
-   GetClassName(handle, class_name.data(), class_name.size());
+   GetClassName(handle, class_name.data(), static_cast<int>(class_name.size()));
    class_name.resize(class_name.find_first_of('\0'));
 
    // Did we find the Main System Tray? If so, then get its size and keep going

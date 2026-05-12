@@ -96,7 +96,7 @@ template <Store STORE, String PATH, class PARENT_KEY, bool OWNED>
 constexpr std::string
 Key<STORE, PATH, PARENT_KEY, OWNED>::FullPath() {
    if constexpr (!std::is_void_v<PARENT_KEY>) {
-      if (PARENT_KEY::FullPath().size()) {
+      if (!PARENT_KEY::FullPath().empty()) {
          return std::string{PARENT_KEY::FullPath()} + "\\" + std::string{KEY_PATH.data()};
       }
    }
@@ -145,11 +145,11 @@ Key<STORE, PATH, PARENT_KEY, OWNED>::Ensure() {
          return {status, hkey};
       }
 
-      auto const KEY_PATH = Key::FullPath();
-      auto const status   = hkey.Create(
-        store_value<STORE_VALUE>, KEY_PATH.c_str(), REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS
+      auto const FULL_PATH     = Key::FullPath();
+      auto const create_status = hkey.Create(
+        store_value<STORE_VALUE>, FULL_PATH.c_str(), REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS
       );
-      return {status, hkey};
+      return {create_status, hkey};
    } else {
       return Key::Open(KEY_READ);
    }
@@ -202,10 +202,10 @@ Key<STORE, PATH, PARENT_KEY, OWNED>::Info() {
    return {subkeys, values};
 }
 
-template <Store STORE, String KEY_PATH, class PARENT_KEY, bool OWNED>
+template <Store STORE, String PATH, class PARENT_KEY, bool OWNED>
 template <class SELF>
 void
-Key<STORE, KEY_PATH, PARENT_KEY, OWNED>::Clear(this SELF&& self) {
+Key<STORE, PATH, PARENT_KEY, OWNED>::Clear(this SELF&& self) {
    if constexpr (IS_OWNED) {
       self.Delete();
    } else {
@@ -257,11 +257,11 @@ template <class TYPE2>
    requires(KEY::IS_OWNED && std::is_constructible_v<TYPE, TYPE2>)
 Value<TYPE, KEY, KEY_NAME>&
 Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
-   auto [status, hKey] = KEY::Ensure();
+   auto [ensure_status, hKey] = KEY::Ensure();
    if (!hKey) {
       throw AccessError{
         "Registry: Couldn't ensure key \"" + store_name_s<KEY::STORE_VALUE>
-        + "\\" + KEY::FullPath() + "\", error: " + std::to_string(status) + "!"
+        + "\\" + KEY::FullPath() + "\", error: " + std::to_string(ensure_status) + "!"
       };
    }
 
@@ -276,7 +276,7 @@ Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
           0,
           REG_SZ,
           reinterpret_cast<BYTE const*>(value2.data()),
-          value2.size()
+          static_cast<DWORD>(value2.size())
         );
         status != ERROR_SUCCESS
       ) {
@@ -294,7 +294,12 @@ Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
 
       if (
         auto const status = RegSetValueExA(
-          hKey.Handle(), name.c_str(), 0, REG_MULTI_SZ, value2.data(), value2.size()
+          hKey.Handle(),
+          name.c_str(),
+          0,
+          REG_MULTI_SZ,
+          reinterpret_cast<BYTE const*>(value2.data()),
+          static_cast<DWORD>(value2.size())
         );
         status != ERROR_SUCCESS
       ) {
@@ -355,7 +360,7 @@ Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
           0,
           REG_BINARY,
           reinterpret_cast<BYTE const*>(value2.data()),
-          value2.size()
+          static_cast<DWORD>(value2.size())
         );
         status != ERROR_SUCCESS
       ) {
@@ -374,15 +379,15 @@ Value<TYPE, KEY, KEY_NAME>::operator=(TYPE2&& value) {
 template <class TYPE, _key KEY, String KEY_NAME>
 Value<TYPE, KEY, KEY_NAME>::
 operator bool() const {
-   auto [status, hKey] = KEY::Open(KEY_QUERY_VALUE);
+   auto [open_status, hKey] = KEY::Open(KEY_QUERY_VALUE);
    if (!hKey) {
-      if (status == ERROR_FILE_NOT_FOUND) {
+      if (open_status == ERROR_FILE_NOT_FOUND) {
          return false;
       }
 
       throw AccessError{
         "Registry: Couldn't open key \"" + store_name_s<KEY::STORE_VALUE>
-        + "\\" + KEY::FullPath() + ", error: " + std::to_string(status) + "!"
+        + "\\" + KEY::FullPath() + ", error: " + std::to_string(open_status) + "!"
       };
    }
 
@@ -408,11 +413,11 @@ operator bool() const {
 template <class TYPE, _key KEY, String KEY_NAME>
 TYPE
 Value<TYPE, KEY, KEY_NAME>::operator*() const {
-   auto [status, hKey] = KEY::Open(KEY_QUERY_VALUE);
+   auto [open_status, hKey] = KEY::Open(KEY_QUERY_VALUE);
    if (!hKey) {
       throw AccessError{
         "Registry: Couldn't open key \"" + store_name_s<KEY::STORE_VALUE>
-        + "\\" + KEY::FullPath() + ", error: " + std::to_string(status) + "!"
+        + "\\" + KEY::FullPath() + ", error: " + std::to_string(open_status) + "!"
       };
    }
 

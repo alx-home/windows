@@ -74,7 +74,8 @@ public:
 
    static RECT GetTrayWndRect();
 
-   void Dispatch(std::function<void()>);
+   void    Dispatch(std::function<void()>);
+   LRESULT OnMessage(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
 protected:
    virtual LRESULT OnMessageImpl(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -102,7 +103,6 @@ private:
 
    // static void GetTrayWndRect(LPRECT lprect);
 
-   LRESULT OnMessage(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
    // Generated message map functions
    LRESULT OnTaskbarCreated(WPARAM wParam, LPARAM lParam);
    // Default handler for tray notification message

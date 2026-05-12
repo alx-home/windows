@@ -49,10 +49,14 @@ JumpList::JumpList() {
    if (list_) {
       UINT          minslot;
       IObjectArray* removed;
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#ifdef __clang__
+#   pragma clang diagnostic push
+#   pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#endif
       if (auto hr = list_->BeginList(&minslot, IID_PPV_ARGS(&removed)); SUCCEEDED(hr)) {
-#pragma clang diagnostic pop
+#ifdef __clang__
+#   pragma clang diagnostic pop
+#endif
          removed_.reset(removed);
       } else {
          failed_ = true;
@@ -84,10 +88,14 @@ JumpList::IsRemoved(IShellItem* item) {
       IShellItem* pcompare;
       auto        compare{Init<IShellItem>()};
       for (UINT i = 0; i < num_items; ++i) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#ifdef __clang__
+#   pragma clang diagnostic push
+#   pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#endif
          if (SUCCEEDED(removed_->GetAt(i, IID_PPV_ARGS(&pcompare)))) {
-#pragma clang diagnostic pop
+#ifdef __clang__
+#   pragma clang diagnostic pop
+#endif
             compare.reset(pcompare);
 
             int order;
@@ -122,15 +130,19 @@ JumpList::AddCategory(std::string_view name, std::vector<std::string> const& ite
 
       IShellItem* psi;
       auto        shell_item{Init<IShellItem>()};
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#ifdef __clang__
+#   pragma clang diagnostic push
+#   pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#endif
       if (
         auto const hr = SHCreateItemInKnownFolder(
           FOLDERID_Documents, KF_FLAG_DEFAULT, witem.data(), IID_PPV_ARGS(&psi)
         );
         !SUCCEEDED(hr)
       ) {
-#pragma clang diagnostic pop
+#ifdef __clang__
+#   pragma clang diagnostic pop
+#endif
          failed_ = true;
          std::cerr << "Couldn't create ishellitem for item " << item << " (" << hr << ")"
                    << std::endl;
@@ -145,10 +157,14 @@ JumpList::AddCategory(std::string_view name, std::vector<std::string> const& ite
 
    IObjectArray* pobject;
    auto          object = Init<IObjectArray>();
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#ifdef __clang__
+#   pragma clang diagnostic push
+#   pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#endif
    if (auto const hr = collection->QueryInterface(IID_PPV_ARGS(&pobject)); !SUCCEEDED(hr)) {
-#pragma clang diagnostic pop
+#ifdef __clang__
+#   pragma clang diagnostic pop
+#endif
       failed_ = true;
       std::cerr << "Couldn't query category object interface (" << hr << ")" << std::endl;
       return;
@@ -194,10 +210,14 @@ JumpList::AddTask(std::string_view title, std::string_view app, std::string_view
 
    IPropertyStore* pproperty_store;
    auto            property_store = Init<IPropertyStore>();
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#ifdef __clang__
+#   pragma clang diagnostic push
+#   pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#endif
    if (auto const hr = link->QueryInterface(IID_PPV_ARGS(&pproperty_store)); !SUCCEEDED(hr)) {
-#pragma clang diagnostic pop
+#ifdef __clang__
+#   pragma clang diagnostic pop
+#endif
       failed_ = true;
       std::cerr << "Couldn't query task property store (" << hr << ")" << std::endl;
       return;
@@ -229,10 +249,14 @@ JumpList::AddTask(std::string_view title, std::string_view app, std::string_view
    }
 
    IShellLink* psl;
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#ifdef __clang__
+#   pragma clang diagnostic push
+#   pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#endif
    if (auto const hr = link->QueryInterface(IID_PPV_ARGS(&psl)); !SUCCEEDED(hr)) {
-#pragma clang diagnostic pop
+#ifdef __clang__
+#   pragma clang diagnostic pop
+#endif
       failed_ = true;
       std::cerr << "Couldn't query link interface (" << hr << ")" << std::endl;
       return;
@@ -278,10 +302,14 @@ JumpList::AddTaskSeparator() {
    }
 
    IShellLink* psl;
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#ifdef __clang__
+#   pragma clang diagnostic push
+#   pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#endif
    if (auto const hr = property_store->QueryInterface(IID_PPV_ARGS(&psl)); !SUCCEEDED(hr)) {
-#pragma clang diagnostic pop
+#ifdef __clang__
+#   pragma clang diagnostic pop
+#endif
       failed_ = true;
       std::cerr << "Couldn't query task property interface (" << GetLastError() << ")" << std::endl;
       return;
@@ -300,10 +328,14 @@ JumpList::CommitTasks() {
    IObjectArray* pobject_array;
    auto          object_array = Init<IObjectArray>();
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#ifdef __clang__
+#   pragma clang diagnostic push
+#   pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#endif
    if (auto const hr = tasks_->QueryInterface(IID_PPV_ARGS(&pobject_array)); !SUCCEEDED(hr)) {
-#pragma clang diagnostic pop
+#ifdef __clang__
+#   pragma clang diagnostic pop
+#endif
       failed_ = true;
       std::cerr << "Couldn't query task property interface (" << GetLastError() << ")" << std::endl;
       return;
