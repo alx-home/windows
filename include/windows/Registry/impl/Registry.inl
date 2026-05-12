@@ -177,7 +177,7 @@ Key<STORE, PATH, PARENT_KEY, OWNED>::Info() {
    DWORD subkeys;
    DWORD values;
    if (
-     auto const status = RegQueryInfoKey(
+     auto const query_status = RegQueryInfoKey(
        hKey.Handle(),
        nullptr,
        nullptr,
@@ -191,11 +191,11 @@ Key<STORE, PATH, PARENT_KEY, OWNED>::Info() {
        nullptr,
        0
      );
-     status != ERROR_SUCCESS
+     query_status != ERROR_SUCCESS
    ) {
       throw AccessError{
         "Registry: Couldn't open key \"" + store_name_s<STORE>
-        + "\\" + FullPath() + "\", error: " + std::to_string(status) + "!"
+        + "\\" + FullPath() + "\", error: " + std::to_string(query_status) + "!"
       };
    }
 
@@ -217,7 +217,7 @@ template <Store STORE, String PATH, class PARENT_KEY, bool OWNED>
 template <class SELF>
 void
 Key<STORE, PATH, PARENT_KEY, OWNED>::Delete(this SELF&&) {
-   auto const KEY_PATH{FullPath()};
+   auto const FULL_PATH{FullPath()};
 
    auto const parent = ParentPath();
    auto const name   = KeyName();
@@ -225,7 +225,7 @@ Key<STORE, PATH, PARENT_KEY, OWNED>::Delete(this SELF&&) {
    details::Key key{};
    if (
      key.Open(
-       store_value<STORE>, KEY_PATH.c_str(), 0, DELETE | KEY_ENUMERATE_SUB_KEYS | KEY_QUERY_VALUE
+       store_value<STORE>, FULL_PATH.c_str(), 0, DELETE | KEY_ENUMERATE_SUB_KEYS | KEY_QUERY_VALUE
      )
      == ERROR_SUCCESS
    ) {
@@ -506,7 +506,7 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
          };
       }
 
-      return value;
+      return static_cast<TYPE>(value);
    } else if constexpr (
      std::is_constructible_v<uint64_t, TYPE> && (sizeof(TYPE) <= sizeof(uint64_t))
    ) {
@@ -523,7 +523,7 @@ Value<TYPE, KEY, KEY_NAME>::operator*() const {
          };
       }
 
-      return value;
+      return static_cast<TYPE>(value);
    } else if constexpr (std::is_constructible_v<std::span<std::byte>, TYPE>) {
       std::vector<std::byte> value{};
       DWORD                  size{};
